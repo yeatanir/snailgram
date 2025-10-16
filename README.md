@@ -33,7 +33,7 @@ Social media at a snail's pace. 🐌
 
 ## 🚀 Try It Now
 
-**Live Demo:** [https://YOUR_USERNAME.github.io/snailgram](https://YOUR_USERNAME.github.io/snailgram)
+**Live Demo:** = https://yeatanir.github.io/snailgram)
 
 > Must be on smartphone (iOS/Android). Desktop doesn't have motion sensors!
 
