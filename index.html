@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Snail gram 🐌</title>
+  <style>
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+      height: 100vh;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
+    .screen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .logo {
+      font-size: 4rem;
+      margin-bottom: 15px;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    .title {
+      font-size: 2.8rem;
+      font-weight: bold;
+      background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #888;
+      font-size: 0.95rem;
+      margin-bottom: 40px;
+      text-align: center;
+      max-width: 350px;
+    }
+    
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 8px 0;
+      width: 100%;
+      max-width: 400px;
+    }
+    
+    .card-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+    
+    .card-subtitle {
+      color: #888;
+      font-size: 0.8rem;
+    }
+    
+    .btn {
+      background: #0095f6;
+      color: white;
+      border: none;
+      padding: 14px 30px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      width: 100%;
+      max-width: 400px;
+      margin-top: 25px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .btn:active {
+      background: #0081db;
+    }
+    
+    .video-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      background: #000;
+    }
+    
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+      pointer-events: none;
+    }
+    
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 12px;
+      text-align: center;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+      z-index: 10;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    
+    .caption {
+      position: absolute;
+      bottom: 80px;
+      left: 0;
+      right: 60px;
+      padding: 15px;
+      z-index: 10;
+    }
+    
+    .username {
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    
+    .caption-text {
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+    
+    .actions {
+      position: absolute;
+      right: 12px;
+      bottom: 100px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      z-index: 10;
+      align-items: center;
+    }
+    
+    .action-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      padding: 0;
+      font-size: 1.6rem;
+      cursor: pointer;
+      transition: transform 0.1s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .action-btn:active {
+      transform: scale(0.9);
+    }
+    
+    .action-count {
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    
+    .stats {
+      position: absolute;
+      top: 55px;
+      right: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      z-index: 10;
+      line-height: 1.6;
+    }
+    
+    .hint {
+      position: absolute;
+      top: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.95);
+      padding: 15px 25px;
+      border-radius: 25px;
+      z-index: 20;
+      font-size: 0.85rem;
+      text-align: center;
+      max-width: 80%;
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-10px); }
+    }
+    
+    .mindful-screen {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      text-align: center;
+      position: relative;
+    }
+    
+    .breath-circle-container {
+      width: 220px;
+      height: 220px;
+      margin: 40px auto;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .breath-circle {
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.25);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      transition: transform 5s ease-in-out;
+      position: absolute;
+    }
+    
+    .breath-circle.inhale {
+      transform: scale(1.3);
+    }
+    
+    .breath-circle.hold {
+      transform: scale(1.3);
+    }
+    
+    .breath-circle.exhale {
+      transform: scale(0.5);
+    }
+    
+    .breath-text {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-transform: capitalize;
+    }
+    
+    .breath-timer {
+      font-size: 3.5rem;
+      font-weight: bold;
+    }
+    
+    .like-animation {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 8rem;
+      z-index: 30;
+      pointer-events: none;
+      animation: heartPop 0.8s ease-out;
+    }
+    
+    @keyframes heartPop {
+      0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    // Prevent iOS shake to undo
+    window.addEventListener('shake', function(e) {
+      e.preventDefault();
+    }, true);
+
+    let screen = 'welcome';
+    let currentIndex = 0;
+    let reels = [];
+    let reelsViewed = 0;
+    let stats = { tilts: 0, shakes: 0 };
+    let shakeBuffer = [];
+    let tiltCooldown = false;
+    let breathingPhase = 'inhale';
+    let breathingTimer = 5;
+    let breathingInterval = null;
+    let showLikeAnim = false;
+    let showHintMessage = true;
+
+    // Initialize reels
+    const videos = [
+      'https://videos.pexels.com/video-files/3571264/3571264-hd_1280_720_30fps.mp4',
+      'https://videos.pexels.com/video-files/4507095/4507095-hd_1280_720_25fps.mp4',
+      'https://videos.pexels.com/video-files/2456292/2456292-hd_1280_720_30fps.mp4',
+      'https://videos.pexels.com/video-files/3571072/3571072-hd_1280_720_30fps.mp4',
+      'https://videos.pexels.com/video-files/2491284/2491284-hd_1280_720_24fps.mp4',
+    ];
+
+    videos.forEach((url, i) => {
+      reels.push({
+        id: i + 1,
+        videoUrl: url,
+        username: ['slow_living', 'zen_master', 'mindful_meditator', 'sloth_life', 'anti_scroll'][i],
+        caption: [
+          'Life moves pretty fast... if you don\'t stop and tilt your phone, you might miss it. 🐌',
+          'Shake your phone to like this. Go ahead. Shake it like your life depends on it. 💪😤',
+          'POV: You\'re trying to scroll but your phone wants you to touch grass instead 🌿',
+          'When the app is designed to make you give up scrolling. Mission accomplished? 🎯🐌',
+          'Triple tap to open this. I dare you. I DOUBLE dare you. 👆👆👆'
+        ][i],
+        likes: Math.floor(Math.random() * 1000000) + 100000,
+        liked: false
+      });
+    });
+
+    function formatNumber(num) {
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+      return num;
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      
+      if (screen === 'welcome') {
+        app.innerHTML = `
+          <div class="screen">
+            <div class="logo">🐌</div>
+            <div class="title">Snail gram</div>
+            <div class="subtitle">Because Your Dopamine Receptors Need a Break</div>
+            
+            <div class="card">
+              <div class="card-title">📱 Tilt to Scroll</div>
+              <div class="card-subtitle">Tilt phone forward/backward to navigate</div>
+            </div>
+            
+            <div class="card">
+              <div class="card-title">💪 Shake to Like</div>
+              <div class="card-subtitle">Shake 3+ times vigorously</div>
+            </div>
+            
+            <div class="card">
+              <div class="card-title">🧘 Mindful Breaks</div>
+              <div class="card-subtitle">Every 5 reels (yes, mandatory!)</div>
+            </div>
+            
+            <button class="btn" onclick="startApp()">Get Started</button>
+            
+            <div class="subtitle" style="margin-top: 30px; font-size: 0.75rem;">
+              Warning: Deliberately frustrating<br>
+              Not responsible for dropped phones 📱
+            </div>
+          </div>
+        `;
+      } else if (screen === 'feed') {
+        const reel = reels[currentIndex];
+        app.innerHTML = `
+          <div class="video-container">
+            <video autoplay loop muted playsinline src="${reel.videoUrl}" id="videoPlayer"></video>
+            <div class="overlay"></div>
+            
+            <div class="top-bar">Reels</div>
+            
+            <div class="stats">
+              🐌 ${reelsViewed}<br>
+              📱 ${stats.tilts}<br>
+              💪 ${stats.shakes}
+            </div>
+            
+            ${showHintMessage ? '<div class="hint">📱 Tilt your phone forward to scroll!<br><small>Shake 3x to like</small></div>' : ''}
+            
+            <div class="actions">
+              <button class="action-btn" onclick="likeButton()">
+                <span style="font-size: 1.8rem;">${reel.liked ? '❤️' : '🤍'}</span>
+                <span class="action-count">${formatNumber(reel.likes)}</span>
+              </button>
+              <button class="action-btn">
+                <span>💬</span>
+                <span class="action-count">${Math.floor(Math.random() * 1000)}</span>
+              </button>
+              <button class="action-btn">
+                <span>📤</span>
+              </button>
+            </div>
+            
+            <div class="caption">
+              <div class="username">@${reel.username}</div>
+              <div class="caption-text">${reel.caption}</div>
+            </div>
+            
+            ${showLikeAnim ? '<div class="like-animation">❤️</div>' : ''}
+          </div>
+        `;
+
+        // Prevent default scrolling and gestures
+        const video = document.getElementById('videoPlayer');
+        if (video) {
+          video.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+        }
+
+      } else if (screen === 'mindful') {
+        app.innerHTML = `
+          <div class="screen mindful-screen">
+            <h2 style="font-size: 2rem; margin-bottom: 15px;">Mindful Moment 🧘</h2>
+            <p style="margin-bottom: 20px; font-size: 1.05rem; opacity: 0.9;">
+              You've viewed ${reelsViewed} reels.<br>Time for a breath.
+            </p>
+            
+            <div class="breath-circle-container">
+              <div class="breath-circle ${breathingPhase}">
+                😌
+              </div>
+            </div>
+            
+            <div class="breath-text">${breathingPhase}</div>
+            <div class="breath-timer">${breathingTimer}</div>
+            
+            <p style="margin-top: 40px; font-size: 1.1rem; opacity: 0.85; max-width: 300px; margin-left: auto; margin-right: auto;">
+              When was the last time<br>you drank water? 💧
+            </p>
+            
+            <div style="margin-top: 40px; font-size: 0.8rem; opacity: 0.7;">
+              Session: ${stats.tilts} tilts • ${stats.shakes} shakes
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function startApp() {
+      // Request permissions
+      if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission().then(response => {
+          if (response === 'granted') {
+            DeviceOrientationEvent.requestPermission().then(() => {
+              screen = 'feed';
+              render();
+              setupSensors();
+            });
+          }
+        }).catch(err => {
+          console.log('Permission denied:', err);
+          screen = 'feed';
+          render();
+          setupSensors();
+        });
+      } else {
+        screen = 'feed';
+        render();
+        setupSensors();
+      }
+    }
+
+    function setupSensors() {
+      // Tilt detection
+      window.addEventListener('deviceorientation', (e) => {
+        if (tiltCooldown || screen !== 'feed') return;
+        const { beta } = e;
+        
+        if (beta > 40) {
+          tiltCooldown = true;
+          goNext();
+          setTimeout(() => tiltCooldown = false, 1000);
+        } else if (beta < -20) {
+          tiltCooldown = true;
+          goPrev();
+          setTimeout(() => tiltCooldown = false, 1000);
+        }
+      });
+
+      // Shake detection - FIXED to prevent bookmark
+      window.addEventListener('devicemotion', (e) => {
+        if (screen !== 'feed') return;
+        
+        // Prevent default to stop iOS shake to undo
+        e.preventDefault();
+        
+        const { accelerationIncludingGravity } = e;
+        if (!accelerationIncludingGravity) return;
+        
+        const { x, y, z } = accelerationIncludingGravity;
+        const acceleration = Math.sqrt(x*x + y*y + z*z);
+        
+        if (acceleration > 25) {
+          const now = Date.now();
+          shakeBuffer.push(now);
+          shakeBuffer = shakeBuffer.filter(t => now - t < 1000);
+          
+          if (shakeBuffer.length >= 3) {
+            toggleLike();
+            shakeBuffer = [];
+          }
+        }
+      }, { passive: false });
+    }
+
+    function goNext() {
+      if (currentIndex < reels.length - 1) {
+        currentIndex++;
+        reelsViewed++;
+        stats.tilts++;
+        showHintMessage = false;
+        
+        // FIXED: Only show mindfulness after EXACTLY 5 reels
+        if (reelsViewed > 0 && reelsViewed % 5 === 0) {
+          screen = 'mindful';
+          startBreathing();
+        }
+        render();
+      }
+    }
+
+    function goPrev() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        stats.tilts++;
+        showHintMessage = false;
+        render();
+      }
+    }
+
+    function toggleLike() {
+      reels[currentIndex].liked = !reels[currentIndex].liked;
+      stats.shakes++;
+      
+      // Show heart animation
+      showLikeAnim = true;
+      render();
+      setTimeout(() => {
+        showLikeAnim = false;
+        render();
+      }, 800);
+    }
+
+    function likeButton() {
+      // Manual like via button (not shake)
+      reels[currentIndex].liked = !reels[currentIndex].liked;
+      render();
+    }
+
+    // FIXED: Breathing with 5 seconds each phase
+    function startBreathing() {
+      breathingPhase = 'inhale';
+      breathingTimer = 5;
+      
+      if (breathingInterval) clearInterval(breathingInterval);
+      
+      breathingInterval = setInterval(() => {
+        breathingTimer--;
+        
+        if (breathingTimer <= 0) {
+          if (breathingPhase === 'inhale') {
+            breathingPhase = 'hold';
+            breathingTimer = 5;
+          } else if (breathingPhase === 'hold') {
+            breathingPhase = 'exhale';
+            breathingTimer = 5;
+          } else {
+            // After exhale, show continue button
+            clearInterval(breathingInterval);
+            setTimeout(() => {
+              screen = 'feed';
+              render();
+            }, 1000);
+            return;
+          }
+        }
+        
+        render();
+      }, 1000);
+    }
+
+    // Initial render
+    render();
+    console.log('Snail gram ready! 🐌');
+  </script>
+</body>
+</html>
