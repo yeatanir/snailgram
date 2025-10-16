@@ -22,6 +22,7 @@
       height: 100vh;
       -webkit-user-select: none;
       user-select: none;
+      touch-action: none;
     }
     
     .screen {
@@ -258,8 +259,6 @@
     }
     
     .breath-circle {
-      width: 100px;
-      height: 100px;
       background: rgba(255,255,255,0.35);
       border-radius: 50%;
       display: flex;
@@ -267,7 +266,7 @@
       justify-content: center;
       font-size: 3rem;
       position: absolute;
-      transition: all 5s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 1s ease-in-out;
     }
     
     .breath-circle.inhale {
@@ -383,7 +382,7 @@
       "Your eyes need a break from screens 👀",
       "Deep breaths. You're not missing anything important. 🌊",
       "Have you blinked recently? Your eyes are dry. 😑",
-      "Posture check! Straighten that back! 🧍",
+      "Posture check! Straighten that back! 🧑",
       "When did you last talk to a human IRL? 🗣️",
       "This could've been a text message. 📨",
       "Remember when you had hobbies? 🎨",
@@ -393,27 +392,37 @@
       "Nothing urgent is happening right now. 🕊️"
     ];
 
-    // Initialize reels
+    // Initialize reels with MORE VIDEOS
     const videos = [
       'https://videos.pexels.com/video-files/3571264/3571264-hd_1280_720_30fps.mp4',
       'https://videos.pexels.com/video-files/4507095/4507095-hd_1280_720_25fps.mp4',
       'https://videos.pexels.com/video-files/2456292/2456292-hd_1280_720_30fps.mp4',
       'https://videos.pexels.com/video-files/3571072/3571072-hd_1280_720_30fps.mp4',
       'https://videos.pexels.com/video-files/2491284/2491284-hd_1280_720_24fps.mp4',
+      'https://videos.pexels.com/video-files/3045163/3045163-hd_1280_720_25fps.mp4',
+      'https://videos.pexels.com/video-files/3209828/3209828-hd_1280_720_25fps.mp4',
+      'https://videos.pexels.com/video-files/6985467/6985467-hd_1280_720_25fps.mp4'
+    ];
+
+    const usernames = ['slow_living', 'zen_master', 'mindful_meditator', 'sloth_life', 'anti_scroll', 'peaceful_panda', 'chill_vibes', 'turtle_pace'];
+    
+    const captions = [
+      'Life moves pretty fast... if you don\'t stop and tilt your phone, you might miss it. 🐌',
+      'Shake your phone to like this. Go ahead. Shake it like your life depends on it. 💪😤',
+      'POV: You\'re trying to scroll but your phone wants you to touch grass instead 🌿',
+      'When the app is designed to make you give up scrolling. Mission accomplished? 🎯🐌',
+      'Triple tap to open this. I dare you. I DOUBLE dare you. 👆👆👆',
+      'Slow down, breathe. The world isn\'t going anywhere. 🌍💨',
+      'Your thumb called. It wants a vacation. 🏖️',
+      'Congrats! You exercised your arms shaking the phone. That counts, right? 💪'
     ];
 
     videos.forEach((url, i) => {
       reels.push({
         id: i + 1,
         videoUrl: url,
-        username: ['slow_living', 'zen_master', 'mindful_meditator', 'sloth_life', 'anti_scroll'][i],
-        caption: [
-          'Life moves pretty fast... if you don\'t stop and tilt your phone, you might miss it. 🐌',
-          'Shake your phone to like this. Go ahead. Shake it like your life depends on it. 💪😤',
-          'POV: You\'re trying to scroll but your phone wants you to touch grass instead 🌿',
-          'When the app is designed to make you give up scrolling. Mission accomplished? 🎯🐌',
-          'Triple tap to open this. I dare you. I DOUBLE dare you. 👆👆👆'
-        ][i],
+        username: usernames[i],
+        caption: captions[i],
         likes: Math.floor(Math.random() * 1000000) + 100000,
         liked: false
       });
@@ -462,7 +471,18 @@
         const reel = reels[currentIndex];
         app.innerHTML = `
           <div class="video-container">
-            <video autoplay loop muted playsinline webkit-playsinline src="${reel.videoUrl}" id="videoPlayer"></video>
+            <video 
+              autoplay 
+              loop 
+              muted 
+              playsinline 
+              webkit-playsinline 
+              x-webkit-airplay="allow"
+              preload="auto"
+              src="${reel.videoUrl}" 
+              id="videoPlayer"
+              style="pointer-events: none;"
+            ></video>
             <div class="overlay"></div>
             
             <div class="top-bar">Reels</div>
@@ -488,7 +508,7 @@
                 <span class="action-count">${Math.floor(Math.random() * 1000)}</span>
               </button>
               <button class="action-btn">
-                <span>📤</span>
+                <span>🔤</span>
               </button>
             </div>
             
@@ -501,11 +521,28 @@
           </div>
         `;
 
-        // Force video to play
+        // Enhanced video playback for mobile
         setTimeout(() => {
           const video = document.getElementById('videoPlayer');
           if (video) {
-            video.play().catch(e => console.log('Video play failed:', e));
+            // Force load and play
+            video.load();
+            const playPromise = video.play();
+            
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  console.log('Video playing successfully');
+                })
+                .catch(error => {
+                  console.log('Video play error:', error);
+                  // Try again with user interaction
+                  document.addEventListener('touchstart', function playOnTouch() {
+                    video.play();
+                    document.removeEventListener('touchstart', playOnTouch);
+                  }, { once: true });
+                });
+            }
           }
         }, 100);
 
@@ -519,7 +556,7 @@
               </p>
               
               <div class="breath-circle-container">
-                <div class="breath-circle ${breathingPhase}">
+                <div class="breath-circle ${breathingPhase}" id="breathCircle">
                   😌
                 </div>
               </div>
@@ -542,11 +579,17 @@
       if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
         DeviceMotionEvent.requestPermission().then(response => {
           if (response === 'granted') {
-            DeviceOrientationEvent.requestPermission().then(() => {
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+              DeviceOrientationEvent.requestPermission().then(() => {
+                screen = 'feed';
+                render();
+                setupSensors();
+              });
+            } else {
               screen = 'feed';
               render();
               setupSensors();
-            });
+            }
           }
         }).catch(err => {
           console.log('Permission denied:', err);
@@ -588,10 +631,9 @@
         }
       });
 
-      // Shake detection
+      // Enhanced shake detection
       window.addEventListener('devicemotion', (e) => {
         if (screen !== 'feed') return;
-        e.preventDefault();
         
         const { accelerationIncludingGravity } = e;
         if (!accelerationIncludingGravity) return;
@@ -609,7 +651,7 @@
             shakeBuffer = [];
           }
         }
-      }, { passive: false });
+      }, { passive: true });
     }
 
     function goNext() {
@@ -660,6 +702,8 @@
       
       if (breathingInterval) clearInterval(breathingInterval);
       
+      render(); // Initial render to set up the circle
+      
       breathingInterval = setInterval(() => {
         breathingTimer--;
         
@@ -672,6 +716,7 @@
             breathingTimer = 5;
           } else {
             clearInterval(breathingInterval);
+            breathingInterval = null;
             currentQuote = quotes[Math.floor(Math.random() * quotes.length)];
             setTimeout(() => {
               screen = 'feed';
@@ -684,6 +729,10 @@
         render();
       }, 1000);
     }
+
+    // Make functions globally accessible
+    window.startApp = startApp;
+    window.likeButton = likeButton;
 
     // Initial render
     render();
