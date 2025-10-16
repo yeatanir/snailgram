@@ -225,9 +225,26 @@
     }
     
     .mindful-screen {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-image: url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=1200&q=80');
+      background-size: cover;
+      background-position: center;
       text-align: center;
       position: relative;
+    }
+    
+    .mindful-screen::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(34, 139, 34, 0.7);
+    }
+    
+    .mindful-content {
+      position: relative;
+      z-index: 1;
     }
     
     .breath-circle-container {
@@ -241,28 +258,31 @@
     }
     
     .breath-circle {
-      width: 100%;
-      height: 100%;
-      background: rgba(255,255,255,0.25);
+      width: 100px;
+      height: 100px;
+      background: rgba(255,255,255,0.35);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 3rem;
-      transition: transform 5s ease-in-out;
       position: absolute;
+      transition: all 5s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .breath-circle.inhale {
-      transform: scale(1.3);
+      width: 220px;
+      height: 220px;
     }
     
     .breath-circle.hold {
-      transform: scale(1.3);
+      width: 220px;
+      height: 220px;
     }
     
     .breath-circle.exhale {
-      transform: scale(0.5);
+      width: 100px;
+      height: 100px;
     }
     
     .breath-text {
@@ -270,11 +290,13 @@
       font-weight: 600;
       margin-bottom: 10px;
       text-transform: capitalize;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     }
     
     .breath-timer {
       font-size: 3.5rem;
       font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     }
     
     .like-animation {
@@ -293,17 +315,51 @@
       50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
       100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
     }
+    
+    .tilt-arrow {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 3rem;
+      z-index: 25;
+      pointer-events: none;
+    }
+    
+    .tilt-arrow.up {
+      top: 30%;
+      animation: arrowFadeUp 1s ease-out;
+    }
+    
+    .tilt-arrow.down {
+      bottom: 30%;
+      animation: arrowFadeDown 1s ease-out;
+    }
+    
+    @keyframes arrowFadeUp {
+      0% { transform: translateX(-50%) translateY(0); opacity: 1; }
+      100% { transform: translateX(-50%) translateY(-50px); opacity: 0; }
+    }
+    
+    @keyframes arrowFadeDown {
+      0% { transform: translateX(-50%) translateY(0); opacity: 1; }
+      100% { transform: translateX(-50%) translateY(50px); opacity: 0; }
+    }
+
+    .mindful-quote {
+      font-size: 1.15rem;
+      opacity: 0.95;
+      max-width: 320px;
+      margin: 40px auto 0;
+      line-height: 1.6;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      padding: 0 20px;
+    }
   </style>
 </head>
 <body>
   <div id="app"></div>
 
   <script>
-    // Prevent iOS shake to undo
-    window.addEventListener('shake', function(e) {
-      e.preventDefault();
-    }, true);
-
     let screen = 'welcome';
     let currentIndex = 0;
     let reels = [];
@@ -316,6 +372,26 @@
     let breathingInterval = null;
     let showLikeAnim = false;
     let showHintMessage = true;
+    let showTiltArrow = '';
+    let currentQuote = '';
+
+    const quotes = [
+      "When was the last time you drank water? 💧",
+      "Have you stretched in the past hour? 🧘",
+      "Text someone you love instead? 💕",
+      "Maybe go outside for 5 minutes? 🌳",
+      "Your eyes need a break from screens 👀",
+      "Deep breaths. You're not missing anything important. 🌊",
+      "Have you blinked recently? Your eyes are dry. 😑",
+      "Posture check! Straighten that back! 🧍",
+      "When did you last talk to a human IRL? 🗣️",
+      "This could've been a text message. 📨",
+      "Remember when you had hobbies? 🎨",
+      "The world exists outside this screen. 🌍",
+      "Your neck is going to hurt later. 💆",
+      "How many hours today? Be honest. ⏰",
+      "Nothing urgent is happening right now. 🕊️"
+    ];
 
     // Initialize reels
     const videos = [
@@ -386,7 +462,7 @@
         const reel = reels[currentIndex];
         app.innerHTML = `
           <div class="video-container">
-            <video autoplay loop muted playsinline src="${reel.videoUrl}" id="videoPlayer"></video>
+            <video autoplay loop muted playsinline webkit-playsinline src="${reel.videoUrl}" id="videoPlayer"></video>
             <div class="overlay"></div>
             
             <div class="top-bar">Reels</div>
@@ -398,6 +474,9 @@
             </div>
             
             ${showHintMessage ? '<div class="hint">📱 Tilt your phone forward to scroll!<br><small>Shake 3x to like</small></div>' : ''}
+            
+            ${showTiltArrow === 'up' ? '<div class="tilt-arrow up">⬆️</div>' : ''}
+            ${showTiltArrow === 'down' ? '<div class="tilt-arrow down">⬇️</div>' : ''}
             
             <div class="actions">
               <button class="action-btn" onclick="likeButton()">
@@ -422,35 +501,37 @@
           </div>
         `;
 
-        // Prevent default scrolling and gestures
-        const video = document.getElementById('videoPlayer');
-        if (video) {
-          video.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
-        }
+        // Force video to play
+        setTimeout(() => {
+          const video = document.getElementById('videoPlayer');
+          if (video) {
+            video.play().catch(e => console.log('Video play failed:', e));
+          }
+        }, 100);
 
       } else if (screen === 'mindful') {
         app.innerHTML = `
           <div class="screen mindful-screen">
-            <h2 style="font-size: 2rem; margin-bottom: 15px;">Mindful Moment 🧘</h2>
-            <p style="margin-bottom: 20px; font-size: 1.05rem; opacity: 0.9;">
-              You've viewed ${reelsViewed} reels.<br>Time for a breath.
-            </p>
-            
-            <div class="breath-circle-container">
-              <div class="breath-circle ${breathingPhase}">
-                😌
+            <div class="mindful-content">
+              <h2 style="font-size: 2rem; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Mindful Moment 🧘</h2>
+              <p style="margin-bottom: 20px; font-size: 1.05rem; opacity: 0.95; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                You've viewed ${reelsViewed} reels.<br>Time for a breath.
+              </p>
+              
+              <div class="breath-circle-container">
+                <div class="breath-circle ${breathingPhase}">
+                  😌
+                </div>
               </div>
-            </div>
-            
-            <div class="breath-text">${breathingPhase}</div>
-            <div class="breath-timer">${breathingTimer}</div>
-            
-            <p style="margin-top: 40px; font-size: 1.1rem; opacity: 0.85; max-width: 300px; margin-left: auto; margin-right: auto;">
-              When was the last time<br>you drank water? 💧
-            </p>
-            
-            <div style="margin-top: 40px; font-size: 0.8rem; opacity: 0.7;">
-              Session: ${stats.tilts} tilts • ${stats.shakes} shakes
+              
+              <div class="breath-text">${breathingPhase}</div>
+              <div class="breath-timer">${breathingTimer}</div>
+              
+              <p class="mindful-quote">${currentQuote}</p>
+              
+              <div style="margin-top: 40px; font-size: 0.8rem; opacity: 0.8; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                Session: ${stats.tilts} tilts • ${stats.shakes} shakes
+              </div>
             </div>
           </div>
         `;
@@ -458,7 +539,6 @@
     }
 
     function startApp() {
-      // Request permissions
       if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
         DeviceMotionEvent.requestPermission().then(response => {
           if (response === 'granted') {
@@ -482,27 +562,35 @@
     }
 
     function setupSensors() {
-      // Tilt detection
+      // Tilt detection with arrow animation
       window.addEventListener('deviceorientation', (e) => {
         if (tiltCooldown || screen !== 'feed') return;
         const { beta } = e;
         
         if (beta > 40) {
           tiltCooldown = true;
-          goNext();
-          setTimeout(() => tiltCooldown = false, 1000);
+          showTiltArrow = 'down';
+          render();
+          setTimeout(() => {
+            showTiltArrow = '';
+            goNext();
+          }, 300);
+          setTimeout(() => tiltCooldown = false, 1200);
         } else if (beta < -20) {
           tiltCooldown = true;
-          goPrev();
-          setTimeout(() => tiltCooldown = false, 1000);
+          showTiltArrow = 'up';
+          render();
+          setTimeout(() => {
+            showTiltArrow = '';
+            goPrev();
+          }, 300);
+          setTimeout(() => tiltCooldown = false, 1200);
         }
       });
 
-      // Shake detection - FIXED to prevent bookmark
+      // Shake detection
       window.addEventListener('devicemotion', (e) => {
         if (screen !== 'feed') return;
-        
-        // Prevent default to stop iOS shake to undo
         e.preventDefault();
         
         const { accelerationIncludingGravity } = e;
@@ -531,9 +619,9 @@
         stats.tilts++;
         showHintMessage = false;
         
-        // FIXED: Only show mindfulness after EXACTLY 5 reels
         if (reelsViewed > 0 && reelsViewed % 5 === 0) {
           screen = 'mindful';
+          currentQuote = quotes[Math.floor(Math.random() * quotes.length)];
           startBreathing();
         }
         render();
@@ -550,10 +638,9 @@
     }
 
     function toggleLike() {
-      reels[currentIndex].liked = !reels[currentIndex].liked;
+      reels[currentIndex].liked = true;
       stats.shakes++;
       
-      // Show heart animation
       showLikeAnim = true;
       render();
       setTimeout(() => {
@@ -563,12 +650,10 @@
     }
 
     function likeButton() {
-      // Manual like via button (not shake)
-      reels[currentIndex].liked = !reels[currentIndex].liked;
+      reels[currentIndex].liked = true;
       render();
     }
 
-    // FIXED: Breathing with 5 seconds each phase
     function startBreathing() {
       breathingPhase = 'inhale';
       breathingTimer = 5;
@@ -586,8 +671,8 @@
             breathingPhase = 'exhale';
             breathingTimer = 5;
           } else {
-            // After exhale, show continue button
             clearInterval(breathingInterval);
+            currentQuote = quotes[Math.floor(Math.random() * quotes.length)];
             setTimeout(() => {
               screen = 'feed';
               render();
