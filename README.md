@@ -4,7 +4,7 @@
 
 A satirical anti-addiction social media app that uses deliberately inconvenient gesture controls to make users question their scrolling habits.
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-success?style=for-the-badge)](https://YOUR_USERNAME.github.io/snailgram)
+A video of the same https://drive.google.com/file/d/1onxjfPqdN3XMrWmORTmWaVGWs3U__5X9/view?usp=sharing
 
 ---
 
@@ -33,7 +33,7 @@ Social media at a snail's pace. 🐌
 
 ## 🚀 Try It Now
 
-**Live Demo:** = https://yeatanir.github.io/snailgram)
+ https://yeatanir.github.io/snailgram)
 
 > Must be on smartphone (iOS/Android). Desktop doesn't have motion sensors!
 
